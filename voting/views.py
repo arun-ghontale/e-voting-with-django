@@ -28,6 +28,9 @@ def generate_ballot(display_controls=False):
         name = position.name
         position_name = slugify(name)
         candidates = Candidate.objects.filter(position=position)
+        if not candidates:
+            instruction = "No candidate to select"
+
         for candidate in candidates:
             if position.max_vote > 1:
                 instruction = "You may select up to " + \
@@ -39,6 +42,7 @@ def generate_ballot(display_controls=False):
                 instruction = "Select only one candidate"
                 input_box = '<input value="'+str(candidate.id)+'" type="radio" class="flat-red ' + \
                     position_name+'" name="'+position_name+'">'
+
             image = "/media/" + str(candidate.photo)
             candidates_data = candidates_data + '<li>' + input_box + '<button type="button" class="btn btn-primary btn-sm btn-flat clist platform" data-fullname="'+candidate.fullname+'" data-bio="'+candidate.bio+'"><i class="fa fa-search"></i> Platform</button><img src="' + \
                 image+'" height="100px" width="100px" class="clist"><span class="cname clist">' + \
@@ -103,6 +107,13 @@ def dashboard(request):
     user = request.user
     # * Check if this voter has been verified
     if user.voter.otp is None or user.voter.verified == False:
+        if user.voter.voted:  # * User has voted
+            # To display election result or candidates I voted for ?
+            context = {
+                'my_votes': Votes.objects.filter(voter=user.voter),
+            }
+            return render(request, "voting/voter/result.html", context)
+
         if not settings.SEND_OTP:
             # Bypass
             msg = bypass_otp()
@@ -233,9 +244,9 @@ def verify_otp(request):
 
 
 def show_ballot(request):
-    if request.user.voter.voted:
-        messages.error(request, "You have voted already")
-        return redirect(reverse('voterDashboard'))
+    # if request.user.voter.voted:
+    #     messages.error(request, "You have voted already")
+    #     return redirect(reverse('voterDashboard'))
     ballot = generate_ballot(display_controls=False)
     context = {
         'ballot': ballot
