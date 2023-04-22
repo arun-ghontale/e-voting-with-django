@@ -158,6 +158,8 @@ $  pip3 install -r requirements.txt
 ```python manage.py makemigrations```
 ```python manage.py migrate```
 
+Note: For Mac a fix is required - https://stackoverflow.com/a/72601869
+
 **6. Now Run Server**
 
 Command for PC:
