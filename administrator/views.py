@@ -14,6 +14,12 @@ def find_n_winners(data, n):
     """Read More
     https://www.geeksforgeeks.org/python-program-to-find-n-largest-elements-from-a-list/
     """
+
+    # this_winner = max(data, key=lambda x: x['votes'])
+    # # TODO: Check if None
+    # this = this_winner['name'] + " with " + str(this_winner['votes']) + " votes"
+    # return ", &nbsp;".join(final_list)
+
     final_list = []
     candidate_data = data[:]
     # print("Candidate = ", str(candidate_data))
@@ -66,7 +72,6 @@ class PrintView(PDFView):
                 if position.max_vote > 1:
                     winner = find_n_winners(candidate_data, position.max_vote)
                 else:
-
                     winner = max(candidate_data, key=lambda x: x['votes'])
                     if winner['votes'] == 0:
                         winner = "No one voted for this yet position, yet."
