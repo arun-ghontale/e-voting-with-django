@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from . import settings
+from voting import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,4 +25,5 @@ urlpatterns = [
     path('account/', include('account.urls')),
     path('administrator/', include('administrator.urls')),
     path('voting/', include('voting.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('face_reco/', views.face_reco, name='face_recognition')] + static(settings.MEDIA_URL,
+                                                                          document_root=settings.MEDIA_ROOT)

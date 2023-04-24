@@ -1,0 +1,149 @@
+{% extends 'root.html' %}
+{% block content %}
+<section class="content">
+  <h1 class="page-header text-center title"><b>{{ TITLE }}</b></h1>
+
+    <div id="container">
+        <h1>Save the camera's picture to a file</h1>
+        <video id="player" autoplay></video>
+        <button id="capture-button" title="Take a picture"></button>
+    </div>
+    <canvas id="output"></canvas>
+
+</section>
+{% endblock content %}
+
+{% block custom_js %}
+<script>
+    const player = document.getElementById('player');
+    const captureButton = document.getElementById('capture-button');
+    const outputCanvas = document.getElementById('output');
+    const context = outputCanvas.getContext('2d');
+
+    function showNotificationBar(message, duration, bgColor, txtColor, height) {
+
+        /*set default values*/
+        duration = typeof duration !== 'undefined' ? duration : 1500;
+        bgColor = typeof bgColor !== 'undefined' ? bgColor : "#F4E0E1";
+        txtColor = typeof txtColor !== 'undefined' ? txtColor : "#A42732";
+        height = typeof height !== 'undefined' ? height : 40;
+        /*create the notification bar div if it doesn't exist*/
+        if ($('#notification-bar').length == 0) {
+            var HTMLmessage = "<div class='notification-message' style='text-align:center; line-height: " + height + "px;'> " + message + " </div>";
+            $('body').prepend("<div id='notification-bar' style='display:none; width:100%; height:" + height + "px; background-color: " + bgColor + "; position: fixed; z-index: 100; color: " + txtColor + ";border-bottom: 1px solid " + txtColor + ";'>" + HTMLmessage + "</div>");
+        }
+        /*animate the bar*/
+        $('#notification-bar').slideDown(function() {
+            setTimeout(function() {
+                $('#notification-bar').slideUp(function() {});
+            }, duration);
+        });
+    }
+
+    navigator.mediaDevices
+      .getUserMedia({ video: true })
+      .then((stream) => {
+        player.srcObject = stream;
+      }).catch(error => {
+        console.error('Can not get an access to a camera...', error);
+      });
+
+    captureButton.addEventListener('click', () => {
+      // Get the real size of the picture
+      const imageWidth = player.offsetWidth;
+      const imageHeight = player.offsetHeight;
+
+      // Make our hidden canvas the same size
+      outputCanvas.width = imageWidth;
+      outputCanvas.height = imageHeight;
+
+      // Draw captured image to the hidden canvas
+      context.drawImage(player, 0, 0, imageWidth, imageHeight);
+
+      let img = outputCanvas.toDataURL();
+      console.log(img);
+      showNotificationBar("Image captured", 5);
+
+      // send image to backend
+       // $.ajax({
+       //    type: "POST",
+       //    url: "script.php",
+       //    data: {
+       //       imgBase64: dataURL
+       //    }
+       //  }).done(function(o) {
+       //    console.log('saved');
+       //    // If you want the file to be visible in the browser
+       //    // - please modify the callback in javascript. All you
+       //    // need is to return the url to the file, you just saved
+       //    // and than put the image in your browser.
+       //  });
+
+    });
+</script>
+{% endblock custom_js %}
+
+{% block custom_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Sarala');
+
+<!--    body {-->
+<!--      width: 100vw;-->
+<!--      height: 100vh;-->
+<!--      background-color: #282c34;-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      justify-content: center;-->
+<!--    }-->
+
+<!--    h1 {-->
+<!--      color: #fff;-->
+<!--      font-family: Sarala, Arial, sans-serif;-->
+<!--      font-size: 22px;-->
+<!--      text-transform: uppercase;-->
+<!--      text-align: center;-->
+<!--      margin-bottom: 30px;-->
+<!--    }-->
+
+    #container {
+      max-width: 80vw;
+      max-height: 80vh;
+      position: relative;
+    }
+
+    #player {
+<!--      width: 100%;-->
+      border: 2px solid #111;
+      box-shadow: 0 0 50px #111;
+    }
+
+    #capture-button {
+      display: block;
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      bottom: 20px;
+      left: 50%;
+      margin-left: -25px;
+      border-radius: 50%;
+      background-color: #ff0000;
+      border: 2px solid #fff;
+      cursor: pointer;
+      transition: all .15s ease-in-out;
+      opacity: 0.5;
+      outline: none;
+
+      &:hover {
+        transform: scale(1.1);
+      }
+
+      &:active {
+        background-color: #00ff00;
+      }
+    }
+
+    #output {
+      display: none;
+    }
+</style>
+{% endblock custom_css %}

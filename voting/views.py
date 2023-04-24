@@ -412,3 +412,7 @@ def submit_ballot(request):
         voter.save()
         messages.success(request, "Thanks for voting")
         return redirect(reverse('voterDashboard'))
+
+
+def face_reco(request):
+    return render(request, "voting/voter/face_reco.html", context=dict())
