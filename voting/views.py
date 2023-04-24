@@ -6,8 +6,17 @@ from django.utils.text import slugify
 from django.contrib import messages
 from django.conf import settings
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 import requests
 import json
+import base64
+from PIL import Image
+import io
+import numpy as np
+import face_recognition
+
+from django.core.files.base import ContentFile
+
 # Create your views here.
 
 
@@ -329,6 +338,37 @@ def preview_vote(request):
     return JsonResponse(context, safe=False)
 
 
+@csrf_exempt
+def face_reco(request):
+    if request.method != 'POST':
+        error = True
+        response = "Please browse the system properly"
+    else:
+        image = dict(request.POST)
+        format, imgstr = image['imgBase64'][0].split(';base64,')
+        ext = format.split('/')[-1]
+        # img = base64.b64decode(imgstr)
+        pil_img = Image.open(io.BytesIO(base64.decodebytes(bytes(imgstr, "utf-8")))).convert("RGB")
+        img = np.array(pil_img)
+        # face_locations = face_recognition.face_locations(img)[0]
+        names = settings.FACE_ENCODINGS['names']
+        face_encodings = settings.FACE_ENCODINGS['face_encodings']
+
+        current_face_encoding = face_recognition.face_encodings(img)
+        if len(current_face_encoding) > 0:
+            matches = face_recognition.face_distance(face_encodings, current_face_encoding[0])
+            match_ind = np.argmin(matches)
+
+            context = {
+                'is_verified': True,
+                'verified_name': names[match_ind],
+                'distance': matches[match_ind]
+            }
+            return JsonResponse(context, safe=False)
+
+    return JsonResponse(dict(), safe=False)
+
+
 def submit_ballot(request):
     if request.method != 'POST':
         messages.error(request, "Please, browse the system properly")
@@ -414,5 +454,5 @@ def submit_ballot(request):
         return redirect(reverse('voterDashboard'))
 
 
-def face_reco(request):
+def face_reco_render(request):
     return render(request, "voting/voter/face_reco.html", context=dict())

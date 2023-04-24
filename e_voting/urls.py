@@ -25,5 +25,6 @@ urlpatterns = [
     path('account/', include('account.urls')),
     path('administrator/', include('administrator.urls')),
     path('voting/', include('voting.urls')),
-    path('face_reco/', views.face_reco, name='face_recognition')] + static(settings.MEDIA_URL,
-                                                                          document_root=settings.MEDIA_ROOT)
+    path('face_verification/', views.face_reco_render, name='face_verification'),
+    path('face_recognition/', views.face_reco, name='face_reco')
+              ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

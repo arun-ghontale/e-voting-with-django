@@ -61,10 +61,31 @@
       context.drawImage(player, 0, 0, imageWidth, imageHeight);
 
       let img = outputCanvas.toDataURL();
-      console.log(img);
-      showNotificationBar("Image captured", 5);
+      toastr.info("Image captured");
 
       // send image to backend
+      $.ajax({
+          type: 'POST',
+          url: '{% url "face_reco" %}',
+          data: {
+                imgBase64: img
+             },
+          dataType: 'json',
+          success: function(response) {
+              console.log('response', response);
+
+              if (response.is_verified){
+                  toastr.success(`Face verified successfully : ${response.verified_name}`);
+                  setTimeout(function (){
+                      window.location = "/voting/dashboard";
+                    }, 5000); // How long you want the delay to be, measured in milliseconds.
+              }
+              else{
+                  toastr.error("Could Not verify face");
+              }
+          }
+      });
+
        // $.ajax({
        //    type: "POST",
        //    url: "script.php",
